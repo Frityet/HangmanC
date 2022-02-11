@@ -9,7 +9,14 @@ extern int errno;
 
 void topbar(struct game game)
 {
+    //Expands to printf("\x1b[1;32m")
+    //Yes, this is macro abuse, too bad!
     ESC_SEQ(1;32m);
+
+    //Yes, I really do call strlen on a string in BSS
+    //I have no clue how else to do this faster, other
+    //than literally counting the characters
+    //The compiler *should* optimise this though
     PRINT_MSG_MIDDLE(1, "Hangman!", "f");
     PRINT_MSG_MIDDLE(3, "You have %zu/%zu guesses left!", game.guesses_remaining, game.guess_count);
 }
@@ -52,6 +59,8 @@ void rendergame(struct game game)
 
 int main(int argc, char *argv[])
 {
+    //I am aware this is unsafe/easy to break
+    //too bad!
     long trycount;
     if (argc < 2) {
         trycount = 8;
@@ -70,7 +79,9 @@ int main(int argc, char *argv[])
 
     while (game.gamestate == GAMESTATE_NONE) {
         guesscharacter(&game, (char) ({
-            int i = getchar();
+            //Make sure that we are only accepting an ASCII char
+            //register because I can
+            register int i = getchar();
             i > 127 ? 'a' : i;
         }));
         checkwin(&game);
@@ -78,6 +89,5 @@ int main(int argc, char *argv[])
     }
 
     rendergame(game);
-
     cleanupgame(game);
 }

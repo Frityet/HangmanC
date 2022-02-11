@@ -31,7 +31,8 @@ bool guesscharacter(struct game *game, char c);
 static inline void cleanupgame(struct game game)
 {
     free(game.hidden_word);
-    free_list(game.guessed_chars), free_list(game.correct_chars);
+    free_list(game.guessed_chars);
+    free_list(game.correct_chars);
     if (!game.default_word)
         free(game.word);
 }

@@ -8,12 +8,12 @@
 #include <stdio.h>
 
 #define ESC                 \x1B
-#define _STRMACRO(_mac)     #_mac
-#define STRMACRO(_mac)      _STRMACRO(_mac)
+#define EVAL(_mac)          _mac
+#define STRMACRO(_mac)      EVAL(#_mac)
 #define PRINT_MACRO(_seq)   printf(STRMACRO(_seq))
 #define ESC_SEQ(_seq)       PRINT_MACRO(ESC[_seq)
 
-#define PRINT_MSG_MIDDLE(_x, _msg, ...) setcursorposition((_x), 50 - strlen(_msg) / 2); printf(_msg, __VA_ARGS__)
+#define PRINT_MSG_MIDDLE(_x, _msg, ...) (setcursorposition((_x), 50 - strlen(_msg) / 2), printf(_msg, __VA_ARGS__))
 
 static inline void clearscreen(void)
 {
