@@ -12,7 +12,7 @@
 #include <dictionary.h>
 
 struct game {
-    unsigned char   *word, *hidden_word, *guessed_chars, *correct_chars;
+    char            *word, *hidden_word, *guessed_chars, *correct_chars;
     size_t          wordlen;
     size_t          guess_count, guesses_remaining;
     bool            default_word;
@@ -24,16 +24,18 @@ struct game {
 };
 
 
-struct game new_game(size_t trycount);
+struct game newgame(size_t trycount);
 
-bool guess_character(struct game *game, unsigned char c);
+bool guesscharacter(struct game *game, char c);
 
-static inline void cleanup_game(struct game game)
+static inline void cleanupgame(struct game game)
 {
     free(game.hidden_word);
-    free(game.guessed_chars);
+    free_list(game.guessed_chars), free_list(game.correct_chars);
     if (!game.default_word)
         free(game.word);
 }
+
+bool checkwin(struct game *game);
 
 #endif //HANGMANC_GAME_

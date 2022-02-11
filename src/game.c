@@ -30,12 +30,12 @@ static size_t writemem(void *contents, size_t size, size_t bytecount, void *ptr)
     memory->data = newmem;
     memcpy(&(memory->data[memory->size]), contents, total);
     memory->size += total;
-    memory->data[memory->size] = 0;
+    memory->data[memory->size] = '\0';
 
     return total;
 }
 
-static unsigned char *get_random_word(char *defaultmsg)
+static char *get_random_word(char *defaultmsg)
 {
     puts("Getting random word");
     CURL *curl = curl_easy_init();
@@ -61,7 +61,7 @@ static unsigned char *get_random_word(char *defaultmsg)
     puts("Done!");
 
 
-    unsigned char *retstr = calloc(mem.size - 3, sizeof(char));
+    char *retstr = calloc(mem.size - 3, sizeof(char));
     for (int i = 2; i < mem.size - 2; ++i) {
         retstr[i - 2] = mem.data[i];
     }
@@ -69,7 +69,7 @@ static unsigned char *get_random_word(char *defaultmsg)
     return retstr;
 }
 
-struct game new_game(size_t trycount)
+struct game newgame(size_t trycount)
 {
     struct game game;
 
@@ -77,8 +77,18 @@ struct game new_game(size_t trycount)
     game.wordlen            = strlen(game.word);
     game.hidden_word        = malloc(sizeof(char) * game.wordlen);
     memset(game.hidden_word, '_', game.wordlen);
-    game.guessed_chars      = LIST(char);
-    game.correct_chars      = LIST(char);
+
+    //List macro defined in src/list.h
+    //this piece of shit segfaults all the time
+    //wouldn't recommend!
+
+    //I should also be dynamically adding more memory to the list as needed
+    //but that segfaults all the time, so fuck that!
+    // We are gonna alloc a fuck ton of memory and let it go
+
+    //I am well aware how shitty this practice is
+    game.guessed_chars      = create_list(sizeof(char), 1024);
+    game.correct_chars      = create_list(sizeof(char), 1024);
     game.guess_count        = trycount;
     game.guesses_remaining  = game.guess_count;
     game.gamestate          = GAMESTATE_NONE;
@@ -86,7 +96,7 @@ struct game new_game(size_t trycount)
     return game;
 }
 
-bool guess_character(struct game *game, unsigned char c)
+bool guesscharacter(struct game *game, char c)
 {
     bool correct = false;
 
@@ -117,4 +127,19 @@ bool guess_character(struct game *game, unsigned char c)
     }
 
     return correct;
+}
+
+bool checkwin(struct game *game)
+{
+//    puts(game->hidden_word);
+//    puts(game->word);
+
+    if (strncmp(game->hidden_word, game->word, game->wordlen) == 0) {
+        game->gamestate = GAMESTATE_WON;
+        return true;
+    } else {
+        if (game->guesses_remaining == 0)
+            game->gamestate = GAMESTATE_LOST;
+        return false;
+    }
 }

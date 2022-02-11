@@ -9,10 +9,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#define ADD_ITEM(_list, _item) ({if (listinfo(_list)->used_spaces == listinfo(_list)->total_spaces) \
-                                    grow_list(_list);                                             \
-                               (_list)[free_index(_list)] = _item;            \
-                               listinfo(_list)->used_spaces++;})
+#define ADD_ITEM(_list, _item) ({   if (listinfo(_list)->used_spaces >= listinfo(_list)->total_spaces)\
+                                        grow_list(_list);\
+                                    (_list)[free_index(_list)] = _item;\
+                                    listinfo(_list)->used_spaces++; })
 
 struct list_data {
     size_t      type_size, total_size, used_spaces, total_spaces;

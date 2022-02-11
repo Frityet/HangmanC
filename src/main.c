@@ -32,41 +32,52 @@ void mainpanel(struct game game)
 void rendergame(struct game game)
 {
     clearscreen();
-    topbar(game);
-    mainpanel(game);
-    bottombar();
+
+    if (game.gamestate == GAMESTATE_WON) {
+        ESC_SEQ(1;32m);
+        PRINT_MSG_MIDDLE(1, "You won!", "f");
+        PRINT_MSG_MIDDLE(2, "The word was: %s", game.word);
+        PRINT_MSG_MIDDLE(3, "Congratulations!", "f");
+    } else if (game.gamestate == GAMESTATE_LOST) {
+        ESC_SEQ(1;31m);
+        PRINT_MSG_MIDDLE(1, "You lost!", "f");
+        PRINT_MSG_MIDDLE(2, "The word was: %s", game.word);
+        PRINT_MSG_MIDDLE(3, "Try again!", "f");
+    } else {
+        topbar(game);
+        mainpanel(game);
+        bottombar();
+    }
 }
 
 int main(int argc, char *argv[])
 {
     long trycount;
     if (argc < 2) {
-        trycount = 20;
+        trycount = 8;
     } else {
         char *end = NULL;
         trycount = strtol(argv[1], &end, 10);
         if (end == NULL) {
-            fprintf(stderr, "Invalid input for trycount reverting to default (20)\n");
-            trycount = 20;
+            fprintf(stderr, "Invalid input for trycount reverting to default (8)\n");
+            trycount = 8;
         }
     }
 
-    struct game game = new_game(trycount);
+    struct game game = newgame(trycount);
 
     rendergame(game);
 
     while (game.gamestate == GAMESTATE_NONE) {
-        guess_character(&game, getchar());
+        guesscharacter(&game, (char) ({
+            int i = getchar();
+            i > 127 ? 'a' : i;
+        }));
+        checkwin(&game);
         rendergame(game);
     }
 
-//    if (game.gamestate == GAMESTATE_WON) {
-//
-//    } else if (game.gamestate == GAMESTATE_LOST) {
-//
-//    } else {
-//
-//    }
+    rendergame(game);
 
-    cleanup_game(game);
+    cleanupgame(game);
 }
