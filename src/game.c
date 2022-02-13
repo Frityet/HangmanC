@@ -91,7 +91,7 @@ struct game newgame(size_t trycount)
     //memset doesn't copy null char or smth like that
     game.hidden_word[game.wordlen + 1] = '\0';
 
-    //List macro defined in src/list.h
+    //List macro defined in include/list.h
     //this piece of shit segfaults all the time
     //wouldn't recommend!
 
